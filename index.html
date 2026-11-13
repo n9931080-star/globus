@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Глобус</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&family=Noto+Color+Emoji&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFF8EF; --card:#FFFFFF; --ink:#1F2433; --muted:#7A7F8C; --line:#EFE6D8;
+    --accent:#2F6FED; --accent-d:#2457C4; --ok:#22A35A; --ok-bg:#E4F6EA; --bad:#E5484D; --bad-bg:#FDE8E8;
+    --gold:#F5A524;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:'Nunito',system-ui,sans-serif}
+  body{min-height:100vh}
+  .flag{font-family:'Noto Color Emoji','Apple Color Emoji','Segoe UI Emoji',sans-serif;line-height:1}
+  .wrap{max-width:440px;margin:0 auto;padding:16px 16px 40px}
+  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+  .logo{font-weight:900;font-size:24px;display:flex;align-items:center;gap:8px}
+  .logo .flag{font-size:26px}
+  .stats{display:flex;gap:8px}
+  .pill{background:var(--card);border:2px solid var(--line);border-radius:999px;padding:4px 12px;font-weight:800;font-size:16px;display:flex;gap:4px;align-items:center}
+  .date{color:var(--muted);font-weight:700;margin:4px 0 14px}
+  .date::first-letter{text-transform:uppercase}
+  .card{background:var(--card);border:2px solid var(--line);border-radius:24px;padding:20px;margin-bottom:14px}
+  .label{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+  .cod{text-align:center}
+  .cod .big{font-size:96px;margin:10px 0 6px}
+  .cod h2{margin:0;font-size:30px;font-weight:900}
+  .meta{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:10px 0 12px}
+  .tag{background:var(--bg);border-radius:12px;padding:6px 10px;font-weight:700;font-size:15px}
+  .fact{font-size:17px;line-height:1.4;margin:0}
+  .btn{display:block;width:100%;border:0;border-radius:18px;padding:16px;font:inherit;font-weight:900;font-size:19px;cursor:pointer;background:var(--accent);color:#fff;box-shadow:0 4px 0 var(--accent-d);transition:transform .08s}
+  .btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--accent-d)}
+  .btn.sec{background:var(--card);color:var(--accent);border:2px solid var(--line);box-shadow:0 4px 0 var(--line)}
+  .done{text-align:center}
+  .done .score{font-size:28px;font-weight:900;margin:6px 0 2px}
+  .done .stars{font-size:28px;letter-spacing:4px;min-height:34px}
+  .done p{color:var(--muted);font-weight:700;margin:6px 0 14px}
+  .atlas-top{display:flex;justify-content:space-between;align-items:baseline}
+  .atlas-top b{font-size:17px}
+  .bar{height:10px;background:var(--bg);border-radius:99px;overflow:hidden;margin:10px 0 12px}
+  .bar i{display:block;height:100%;background:var(--ok);border-radius:99px;transition:width .6s}
+  .flags{display:flex;flex-wrap:wrap;gap:6px;font-size:28px;min-height:30px}
+  .empty{color:var(--muted);font-weight:700;font-size:15px}
+
+  /* quiz */
+  .top{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  .x{border:0;background:none;font-size:26px;color:var(--muted);cursor:pointer;padding:4px 6px;font-family:inherit;font-weight:900}
+  .segs{flex:1;display:flex;gap:6px}
+  .segs i{flex:1;height:10px;border-radius:99px;background:var(--line)}
+  .segs i.cur{background:var(--accent)} .segs i.ok{background:var(--ok)} .segs i.bad{background:var(--bad)}
+  .mode{font-size:13px;font-weight:800;color:var(--muted);text-align:center;margin:-8px 0 10px;text-transform:uppercase;letter-spacing:.08em}
+  .q{font-size:24px;font-weight:900;text-align:center;margin:6px 0 14px;line-height:1.25}
+  .qflag{font-size:120px;text-align:center;margin:0 0 18px}
+  .opts{display:grid;gap:10px}
+  .opts.grid{grid-template-columns:1fr 1fr}
+  .opt{border:2px solid var(--line);background:var(--card);border-radius:18px;padding:16px 14px;font:inherit;font-size:19px;font-weight:800;color:var(--ink);cursor:pointer;text-align:center;box-shadow:0 3px 0 var(--line);transition:background .15s,border-color .15s}
+  .opt:disabled{cursor:default}
+  .opts.grid .opt{font-size:64px;padding:14px 6px}
+  .opt.area{display:flex;align-items:center;gap:12px;text-align:left}
+  .opt.area .flag{font-size:40px}
+  .opt.ok{background:var(--ok-bg);border-color:var(--ok);box-shadow:0 3px 0 var(--ok)}
+  .opt.bad{background:var(--bad-bg);border-color:var(--bad);box-shadow:0 3px 0 var(--bad);animation:shake .4s}
+  .opt.dim{opacity:.5}
+  @keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+  .hint{min-height:52px;margin:16px 0 12px;font-size:17px;font-weight:700;text-align:center;line-height:1.35}
+  .hint.ok{color:var(--ok)} .hint.bad{color:var(--bad)}
+  #next{visibility:hidden}
+
+  /* result */
+  .res{text-align:center;padding-top:20px}
+  .res .stars{font-size:48px;letter-spacing:6px;min-height:58px}
+  .res h2{font-size:32px;margin:6px 0}
+  .res .msg{font-size:20px;font-weight:800;margin:0 0 18px}
+  .res .streak{font-size:20px;font-weight:800;margin-bottom:12px}
+  .res .added{font-weight:700;color:var(--muted);margin-bottom:22px}
+  .res .added .flag{font-size:26px}
+  .res .btn{margin-top:10px}
+
+  .screen{animation:in .3s ease-out}
+  @keyframes in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  [hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<script>
+(function(){
+'use strict';
+
+/* ---------- Контент: 76 стран ---------- */
+// [ISO, название, столица, материк, площадь (тыс. км²), факт, исключения: c = не спрашивать столицу, m = не спрашивать материк]
+const EU='Европа', AS='Азия', AF='Африка', NA='Северная Америка', SA='Южная Америка', OC='Океания';
+const CONTINENTS=[EU,AS,AF,NA,SA,OC];
+const RAW=[
+ ['RU','Россия','Москва',EU,17098,'Самая большая страна в мире — в ней 11 часовых поясов.','m'],
+ ['FR','Франция','Париж',EU,552,'Эйфелеву башню построили в 1889 году, и сначала многим парижанам она не нравилась.'],
+ ['DE','Германия','Берлин',EU,357,'Первый автомобиль с бензиновым мотором создал немец Карл Бенц в 1886 году.'],
+ ['IT','Италия','Рим',EU,301,'Внутри Рима находится целая страна — Ватикан.'],
+ ['ES','Испания','Мадрид',EU,506,'В Испании проходит праздник Томатина, где все кидаются помидорами.'],
+ ['GB','Великобритания','Лондон',EU,243,'Биг-Бен — это на самом деле имя большого колокола внутри башни.'],
+ ['PT','Португалия','Лиссабон',EU,92,'Португалия производит около половины всей пробки в мире.'],
+ ['NL','Нидерланды','Амстердам',EU,42,'Около четверти страны лежит ниже уровня моря.'],
+ ['CH','Швейцария','Берн',EU,41,'В Швейцарии четыре официальных языка.'],
+ ['AT','Австрия','Вена',EU,84,'Композитор Моцарт родился в австрийском городе Зальцбург.'],
+ ['SE','Швеция','Стокгольм',EU,450,'Нобелевскую премию придумал швед Альфред Нобель.'],
+ ['NO','Норвегия','Осло',EU,385,'Летом на севере Норвегии солнце не заходит круглые сутки.'],
+ ['FI','Финляндия','Хельсинки',EU,338,'В Финляндии больше 180 тысяч озёр.'],
+ ['DK','Дания','Копенгаген',EU,43,'Конструктор LEGO придумали в Дании.'],
+ ['IS','Исландия','Рейкьявик',EU,103,'В Исландии есть вулканы, гейзеры и ледники одновременно.'],
+ ['IE','Ирландия','Дублин',EU,70,'Символ Ирландии — трилистник клевера.'],
+ ['PL','Польша','Варшава',EU,313,'Мария Склодовская-Кюри, дважды лауреат Нобелевской премии, родилась в Варшаве.'],
+ ['CZ','Чехия','Прага',EU,79,'Астрономическим часам на площади в Праге больше 600 лет.'],
+ ['HU','Венгрия','Будапешт',EU,93,'Кубик Рубика придумал венгр Эрнё Рубик.'],
+ ['GR','Греция','Афины',EU,132,'Олимпийские игры зародились в Древней Греции.'],
+ ['UA','Украина','Киев',EU,604,'Украина — самая большая по площади страна, целиком лежащая в Европе.'],
+ ['BY','Беларусь','Минск',EU,208,'В Беловежской пуще живут зубры — самые крупные животные Европы.'],
+ ['HR','Хорватия','Загреб',EU,57,'Собаки-далматинцы названы в честь хорватской области Далмация.'],
+ ['BG','Болгария','София',EU,111,'В Болгарии кивок головой означает «нет», а покачивание — «да».'],
+ ['RO','Румыния','Бухарест',EU,238,'В Румынии стоит замок Бран, который называют замком Дракулы.'],
+ ['CN','Китай','Пекин',AS,9597,'Великая Китайская стена тянется на тысячи километров.'],
+ ['JP','Япония','Токио',AS,378,'Япония состоит из более чем 14 тысяч островов.'],
+ ['KR','Южная Корея','Сеул',AS,100,'Корейский алфавит хангыль придумали специально, чтобы его было легко выучить.'],
+ ['IN','Индия','Нью-Дели',AS,3287,'Шахматы появились в Индии много веков назад.'],
+ ['TR','Турция','Анкара',AS,784,'Стамбул стоит сразу в двух частях света — в Европе и в Азии.','m'],
+ ['KZ','Казахстан','Астана',AS,2725,'Гагарин полетел в космос с космодрома Байконур в Казахстане.','m'],
+ ['MN','Монголия','Улан-Батор',AS,1564,'В Монголии лошадей больше, чем людей.'],
+ ['TH','Таиланд','Бангкок',AS,513,'Полное название Бангкока — одно из самых длинных названий городов в мире.'],
+ ['VN','Вьетнам','Ханой',AS,331,'По форме Вьетнам похож на букву S.'],
+ ['ID','Индонезия','Джакарта',AS,1905,'Индонезия — самая большая островная страна: в ней больше 17 тысяч островов.','c'],
+ ['SA','Саудовская Аравия','Эр-Рияд',AS,2150,'В Саудовской Аравии нет ни одной постоянной реки.'],
+ ['AE','ОАЭ','Абу-Даби',AS,84,'В Дубае стоит Бурдж-Халифа — самое высокое здание в мире.'],
+ ['IR','Иран','Тегеран',AS,1648,'В Иране веками ткут знаменитые персидские ковры.'],
+ ['NP','Непал','Катманду',AS,147,'Флаг Непала — единственный в мире не прямоугольный.'],
+ ['PH','Филиппины','Манила',AS,300,'Филиппины состоят из более чем 7600 островов.'],
+ ['MY','Малайзия','Куала-Лумпур',AS,330,'Башни Петронас — самые высокие башни-близнецы в мире.'],
+ ['SG','Сингапур','Сингапур',AS,0.73,'Сингапур — это и страна, и город одновременно.','c'],
+ ['UZ','Узбекистан','Ташкент',AS,449,'Чтобы добраться из Узбекистана до океана, нужно пересечь минимум две границы.'],
+ ['EG','Египет','Каир',AF,1002,'Пирамидам в Гизе больше 4500 лет.'],
+ ['KE','Кения','Найроби',AF,580,'Кенийские бегуны часто побеждают в марафонах по всему миру.'],
+ ['ZA','ЮАР','Претория',AF,1221,'В ЮАР сразу три столицы.','c'],
+ ['NG','Нигерия','Абуджа',AF,924,'В Нигерии живёт больше всего людей среди стран Африки.'],
+ ['MA','Марокко','Рабат',AF,447,'Из Марокко в ясную погоду видно Испанию на другом берегу пролива.'],
+ ['ET','Эфиопия','Аддис-Абеба',AF,1104,'Эфиопию считают родиной кофе.'],
+ ['TZ','Танзания','Додома',AF,945,'В Танзании находится Килиманджаро — самая высокая гора Африки.'],
+ ['MG','Мадагаскар','Антананариву',AF,587,'Лемуры живут в дикой природе только на Мадагаскаре.'],
+ ['GH','Гана','Аккра',AF,239,'Гана — один из крупнейших в мире производителей какао.'],
+ ['DZ','Алжир','Алжир',AF,2382,'Алжир — самая большая по площади страна Африки.','c'],
+ ['CD','ДР Конго','Киншаса',AF,2345,'Река Конго — самая глубокая река в мире.'],
+ ['US','США','Вашингтон',NA,9834,'Статую Свободы подарила США Франция.'],
+ ['CA','Канада','Оттава',NA,9985,'У Канады самая длинная береговая линия в мире.'],
+ ['MX','Мексика','Мехико',NA,1964,'Кукуруза и какао распространились по миру из Мексики и соседних земель.'],
+ ['CU','Куба','Гавана',NA,110,'Куба — самый большой остров в Карибском море.'],
+ ['JM','Ямайка','Кингстон',NA,11,'Самый быстрый человек в мире, Усэйн Болт, родом с Ямайки.'],
+ ['PA','Панама','Панама',NA,75,'Панамский канал соединяет Атлантический и Тихий океаны.','c'],
+ ['CR','Коста-Рика','Сан-Хосе',NA,51,'В Коста-Рике нет армии.'],
+ ['BR','Бразилия','Бразилиа',SA,8516,'Через Бразилию течёт Амазонка — самая полноводная река в мире.'],
+ ['AR','Аргентина','Буэнос-Айрес',SA,2780,'В Аргентине находится Аконкагуа — самая высокая гора обеих Америк.'],
+ ['CL','Чили','Сантьяго',SA,756,'Чили — одна из самых длинных и узких стран в мире.'],
+ ['PE','Перу','Лима',SA,1285,'В горах Перу стоит древний город инков Мачу-Пикчу.'],
+ ['CO','Колумбия','Богота',SA,1142,'Колумбия добывает больше всего изумрудов в мире.'],
+ ['VE','Венесуэла','Каракас',SA,916,'В Венесуэле находится Анхель — самый высокий водопад в мире.'],
+ ['BO','Боливия','Сукре',SA,1099,'В Боливии есть Уюни — самая большая соляная равнина в мире.','c'],
+ ['EC','Эквадор','Кито',SA,256,'Эквадор назван в честь экватора, который через него проходит.'],
+ ['UY','Уругвай','Монтевидео',SA,176,'Уругвай выиграл самый первый чемпионат мира по футболу в 1930 году.'],
+ ['PY','Парагвай','Асунсьон',SA,407,'В Парагвае любят терере — холодный чай мате.'],
+ ['AU','Австралия','Канберра',OC,7692,'Австралия — единственная страна, которая занимает целый материк.'],
+ ['NZ','Новая Зеландия','Веллингтон',OC,268,'Новая Зеландия — родина птицы киви, которая не умеет летать.'],
+ ['FJ','Фиджи','Сува',OC,18,'Фиджи состоит из более чем 300 островов.'],
+ ['PG','Папуа — Новая Гвинея','Порт-Морсби',OC,463,'В Папуа — Новой Гвинее говорят больше чем на 800 языках.'],
+ ['WS','Самоа','Апиа',OC,2.8,'Самоа одной из первых в мире встречает новый день.'],
+];
+const C=RAW.map(r=>({code:r[0],name:r[1],cap:r[2],cont:r[3],area:r[4],fact:r[5],noCap:(r[6]||'').includes('c'),noCont:(r[6]||'').includes('m')}));
+const N=C.length;
+const BY={}; C.forEach(c=>BY[c.code]=c);
+const flag=code=>String.fromCodePoint(...[...code].map(ch=>0x1F1E6+ch.charCodeAt(0)-65));
+
+/* ---------- ГПСЧ и даты ---------- */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+const shuffle=(arr,rnd)=>{const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const pad=n=>String(n).padStart(2,'0');
+const keyOf=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const dayNum=d=>Math.floor(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/864e5);
+const keyFromNum=n=>{const d=new Date(n*864e5);return d.getUTCFullYear()+'-'+pad(d.getUTCMonth()+1)+'-'+pad(d.getUTCDate());};
+
+const EPOCH=20000; // начало отсчёта циклов
+function countryOfDay(n){
+  const k=((n-EPOCH)%N+N)%N, cycle=Math.floor((n-EPOCH)/N);
+  return shuffle(C,mulberry32(cycle*104729+17))[k];
+}
+
+/* ---------- Генератор вопросов ---------- */
+const TYPES=['flag','pick','cap','capr','cont','area'];
+const okFor=(t,c)=>(t==='cap'||t==='capr')?!c.noCap:(t==='cont')?!c.noCont:true;
+
+function distractors(subject,valueOf,pool,rnd,k){
+  const cv=valueOf(subject), used=new Set([cv]);
+  const cand=shuffle(pool.filter(c=>c.code!==subject.code),rnd)
+    .sort((a,b)=>(a.cont===subject.cont?0:1)-(b.cont===subject.cont?0:1));
+  const out=[];
+  for(const c of cand){const v=valueOf(c); if(used.has(v)) continue; used.add(v); out.push(c); if(out.length===k) break;}
+  return out;
+}
+
+function makeQ(type,s,rnd,used){
+  if(type==='area'){
+    const others=shuffle(C.filter(c=>!used.has(c.code)&&c.code!==s.code&&Math.max(c.area,s.area)/Math.min(c.area,s.area)>=1.4),rnd);
+    const o=others[0]; used.add(o.code);
+    const pair=shuffle([s,o],rnd), big=s.area>o.area?s:o;
+    return {type,subjects:[s.code,o.code],prompt:'Какая страна больше по площади?',
+      options:pair.map(c=>({id:c.code,label:c.name,flag:flag(c.code)})),answer:big.code,
+      hint:`${s.name} — ${fmtArea(s.area)}, ${o.name} — ${fmtArea(o.area)}.`};
+  }
+  const P=(type==='cap'||type==='capr')?C.filter(c=>!c.noCap):C;
+  let opts, prompt, big=null, grid=false, hintOk, hintBad;
+  if(type==='flag'){
+    opts=[s,...distractors(s,c=>c.name,P,rnd,3)].map(c=>({id:c.code,label:c.name}));
+    prompt='Чей это флаг?'; big=flag(s.code);
+    hintOk=`Верно! Это ${s.name}. ${s.fact}`; hintBad=`Почти! Это флаг: ${s.name}.`;
+  }else if(type==='pick'){
+    opts=[s,...distractors(s,c=>c.code,P,rnd,3)].map(c=>({id:c.code,flag:flag(c.code),label:c.name}));
+    prompt=`Найди флаг: ${s.name}`; grid=true;
+    hintOk=`Верно! ${s.fact}`; hintBad=`Почти! Правильный флаг выделен зелёным.`;
+  }else if(type==='cap'){
+    opts=[s,...distractors(s,c=>c.cap,P,rnd,3)].map(c=>({id:c.code,label:c.cap}));
+    prompt=`Столица страны ${s.name}?`;
+    hintOk=`Верно! Столица — ${s.cap}.`; hintBad=`Почти! Правильно — ${s.cap}.`;
+  }else if(type==='capr'){
+    opts=[s,...distractors(s,c=>c.name,P,rnd,3)].map(c=>({id:c.code,label:c.name}));
+    prompt=`${s.cap} — столица какой страны?`;
+    hintOk=`Верно! ${s.cap} — столица: ${s.name}.`; hintBad=`Почти! Правильно — ${s.name}.`;
+  }else{ // cont
+    const wrong=shuffle(CONTINENTS.filter(x=>x!==s.cont),rnd).slice(0,3);
+    opts=[s.cont,...wrong].map(x=>({id:x===s.cont?s.code:x,label:x}));
+    prompt=`Где находится ${s.name}?`;
+    hintOk=`Верно! ${s.fact}`; hintBad=`Почти! ${s.name} — это ${s.cont}.`;
+  }
+  return {type,subjects:[s.code],prompt,big,grid,options:shuffle(opts,rnd),answer:s.code,hintOk,hintBad};
+}
+
+function makeRound(rnd,must){
+  const types=shuffle(TYPES,rnd).slice(0,5), used=new Set(), qs=[];
+  let mustIdx=-1;
+  if(must){ mustIdx=types.findIndex(t=>okFor(t,must)); used.add(must.code); }
+  types.forEach((t,i)=>{
+    let s;
+    if(i===mustIdx) s=must;
+    else { s=shuffle(C,rnd).find(c=>!used.has(c.code)&&okFor(t,c)); used.add(s.code); }
+    qs.push(makeQ(t,s,rnd,used));
+  });
+  return shuffle(qs,rnd);
+}
+const dailyRound=n=>makeRound(mulberry32(n*7919+1),countryOfDay(n));
+const practiceRound=()=>makeRound(mulberry32((Math.random()*2**32)>>>0),null);
+
+function fmtArea(a){
+  if(a<1) return Math.round(a*1000).toLocaleString('ru-RU')+' км²';
+  return a.toLocaleString('ru-RU')+' тыс. км²';
+}
+
+/* ---------- Состояние ---------- */
+const KEY='globus-v1';
+function load(){
+  const d={streak:0,last:null,stars:0,seen:[],played:{}};
+  try{const s=JSON.parse(localStorage.getItem(KEY)); if(s&&typeof s==='object') return Object.assign(d,s);}catch(e){}
+  return d;
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+const S=load();
+
+const now=new Date(), TODAY=dayNum(now), TODAY_KEY=keyOf(now), YEST_KEY=keyFromNum(TODAY-1);
+if(S.last && S.last!==TODAY_KEY && S.last!==YEST_KEY && S.streak){ S.streak=0; save(); }
+
+const starsFor=n=>n===5?3:n===4?2:n>=2?1:0;
+const MSG=['Ничего, завтра получится!','Хорошее начало!','Неплохо! Продолжай!','Хорошо! Ты молодец!','Отлично! Почти идеально!','Идеально! Настоящий географ!'];
+const plural=(n,a,b,c)=>{const m10=n%10,m100=n%100;return (m10===1&&m100!==11)?a:(m10>=2&&m10<=4&&(m100<12||m100>14))?b:c;};
+const esc=s=>String(s).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+
+/* ---------- Экраны ---------- */
+const app=document.getElementById('app');
+
+function home(){
+  const c=countryOfDay(TODAY), played=S.played[TODAY_KEY];
+  const seen=S.seen.filter(x=>BY[x]);
+  const pct=Math.round(seen.length/N*100);
+  const date=now.toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'});
+  app.innerHTML=`<div class="screen">
+    <header>
+      <div class="logo"><span class="flag">🌍</span>Глобус</div>
+      <div class="stats"><span class="pill">🔥 ${S.streak}</span><span class="pill">⭐ ${S.stars}</span></div>
+    </header>
+    <div class="date">${esc(date)}</div>
+    <div class="card cod">
+      <div class="label">Страна дня</div>
+      <div class="big flag">${flag(c.code)}</div>
+      <h2>${esc(c.name)}</h2>
+      <div class="meta"><span class="tag">🏛 ${esc(c.cap)}</span><span class="tag">🗺 ${esc(c.cont)}</span></div>
+      <p class="fact">${esc(c.fact)}</p>
+    </div>
+    ${played===undefined
+      ? `<button class="btn" id="play">Играть · 5 вопросов</button>`
+      : `<div class="card done">
+          <div class="label">Сегодня</div>
+          <div class="score">${played} из 5</div>
+          <div class="stars">${'⭐'.repeat(starsFor(played))}</div>
+          <p>Новая страна — завтра!</p>
+          <button class="btn sec" id="train">Тренировка</button>
+        </div>`}
+    <div class="card" style="margin-top:14px">
+      <div class="atlas-top"><b>Мой атлас</b><span class="empty">${seen.length} из ${N} стран</span></div>
+      <div class="bar"><i style="width:${pct}%"></i></div>
+      <div class="flags flag">${seen.length?seen.slice(-14).reverse().map(flag).join(''):'<span class="empty" style="font-family:Nunito">Отвечай правильно — и флаги появятся здесь</span>'}</div>
+    </div>
+  </div>`;
+  const p=document.getElementById('play'); if(p) p.onclick=()=>quiz(dailyRound(TODAY),true);
+  const t=document.getElementById('train'); if(t) t.onclick=()=>quiz(practiceRound(),false);
+}
+
+function quiz(qs,daily){
+  let i=0; const res=[]; const added=[];
+  function show(){
+    const q=qs[i];
+    const segs=qs.map((_,k)=>`<i class="${k<i?(res[k]?'ok':'bad'):k===i?'cur':''}"></i>`).join('');
+    let opts;
+    if(q.type==='area') opts=q.options.map(o=>`<button class="opt area" data-id="${o.id}"><span class="flag">${o.flag}</span><span>${esc(o.label)}</span></button>`).join('');
+    else if(q.grid) opts=q.options.map(o=>`<button class="opt flag" data-id="${o.id}" aria-label="${esc(o.label)}">${o.flag}</button>`).join('');
+    else opts=q.options.map(o=>`<button class="opt" data-id="${esc(o.id)}">${esc(o.label)}</button>`).join('');
+    app.innerHTML=`<div class="screen">
+      <div class="top"><button class="x" id="quit" aria-label="Выйти">✕</button><div class="segs">${segs}</div></div>
+      ${daily?'':'<div class="mode">Тренировка</div>'}
+      <div class="q">${esc(q.prompt)}</div>
+      ${q.big?`<div class="qflag flag">${q.big}</div>`:''}
+      <div class="opts ${q.grid?'grid':''}">${opts}</div>
+      <div class="hint" id="hint"></div>
+      <button class="btn" id="next">${i===qs.length-1?'Итог':'Дальше'}</button>
+    </div>`;
+    document.getElementById('quit').onclick=home;
+    app.querySelectorAll('.opt').forEach(b=>b.onclick=()=>answer(b));
+    document.getElementById('next').onclick=()=>{ i++; i<qs.length?show():finish(); };
+  }
+  function answer(b){
+    const q=qs[i], ok=b.dataset.id===q.answer;
+    res[i]=ok;
+    app.querySelectorAll('.opt').forEach(x=>{
+      x.disabled=true;
+      if(x.dataset.id===q.answer) x.classList.add('ok');
+      else if(x===b) x.classList.add('bad');
+      else x.classList.add('dim');
+    });
+    const h=document.getElementById('hint');
+    h.className='hint '+(ok?'ok':'bad');
+    h.textContent=q.type==='area'?(ok?'Верно! ':'Почти! ')+q.hint:(ok?q.hintOk:q.hintBad);
+    if(ok) q.subjects.forEach(code=>{ if(!S.seen.includes(code)){ S.seen.push(code); added.push(code);} });
+    document.querySelector('.segs').children[i].className=ok?'ok':'bad';
+    document.getElementById('next').style.visibility='visible';
+    save();
+  }
+  function finish(){
+    const score=res.filter(Boolean).length;
+    let stars=0;
+    if(daily && S.played[TODAY_KEY]===undefined){
+      stars=starsFor(score);
+      S.streak=(S.last===YEST_KEY)?S.streak+1:(S.last===TODAY_KEY?S.streak:1);
+      S.last=TODAY_KEY; S.stars+=stars; S.played[TODAY_KEY]=score; save();
+    }
+    app.innerHTML=`<div class="screen res">
+      <div class="stars">${daily?'⭐'.repeat(stars):''}</div>
+      <h2>${score} из 5</h2>
+      <p class="msg">${MSG[score]}</p>
+      ${daily?`<div class="streak">🔥 ${S.streak} ${plural(S.streak,'день','дня','дней')} подряд</div>`:''}
+      ${added.length?`<div class="added">В атлас добавлено:<br><span class="flag">${added.map(flag).join(' ')}</span></div>`:''}
+      <button class="btn" id="home">На главную</button>
+      <button class="btn sec" id="again">${daily?'Тренировка':'Ещё раунд'}</button>
+    </div>`;
+    document.getElementById('home').onclick=home;
+    document.getElementById('again').onclick=()=>quiz(practiceRound(),false);
+  }
+  show();
+}
+
+/* ---------- Самопроверка генератора (вызов: __globusSelfTest()) ---------- */
+window.__globusSelfTest=function(days=3000){
+  const errs=[];
+  for(let d=TODAY;d<TODAY+days;d++){
+    const qs=dailyRound(d), cod=countryOfDay(d).code;
+    if(qs.length!==5) errs.push([d,'len']);
+    if(!qs.some(q=>q.subjects.includes(cod))) errs.push([d,'no country of day']);
+    const subj=qs.flatMap(q=>q.subjects); if(new Set(subj).size!==subj.length) errs.push([d,'repeat country']);
+    if(new Set(qs.map(q=>q.type)).size!==5) errs.push([d,'repeat type']);
+    qs.forEach(q=>{
+      const ids=q.options.map(o=>o.id), labels=q.options.map(o=>o.label);
+      if(!ids.includes(q.answer)) errs.push([d,q.type,'no answer']);
+      if(new Set(ids).size!==ids.length||new Set(labels).size!==labels.length) errs.push([d,q.type,'dup option']);
+      if(q.options.length!==(q.type==='area'?2:4)) errs.push([d,q.type,'count']);
+    });
+  }
+  // страна дня без повторов в каждом цикле
+  for(let cyc=0;cyc<20;cyc++){const s=new Set();for(let k=0;k<N;k++)s.add(countryOfDay(EPOCH+cyc*N+k).code);if(s.size!==N)errs.push(['cycle',cyc]);}
+  return {countries:N,days,errors:errs.length,sample:errs.slice(0,5)};
+};
+
+home();
+})();
+</script>
+</body>
+</html>
